@@ -23,7 +23,7 @@
 			this.App = app;
 			this.Client = client;
 		}
-
+		
 		protected override void OnAddressChange( CefBrowser browser, CefFrame frame, String url )
 		{
 			if( frame.IsMain && this.Client.HandleAddressChange != null )
@@ -46,23 +46,6 @@
 
 			return true;
 			//return base.OnConsoleMessage( browser, message, source, line );
-		}
-
-		protected override void OnLoadingStateChange( CefBrowser browser, Boolean isLoading, Boolean canGoBack, Boolean canGoForward )
-		{
-			Log.Trace( "DisplayHandler.OnLoadingStateChange( browser: {0}, isLoading: {1}, canGoBack: {2}, canGoForward: {3} )", browser.Identifier, isLoading, canGoBack, canGoForward );
-			
-			if( isLoading && this.Client.HandleLoadStarted != null )
-			{
-				this.Client.HandleLoadStarted();
-			}
-			
-			if( isLoading == false && this.Client.HandleLoadFinished != null )
-			{
-				this.Client.HandleLoadFinished();
-			}
-
-			base.OnLoadingStateChange( browser, isLoading, canGoBack, canGoForward );
 		}
 
 		protected override void OnStatusMessage( CefBrowser browser, String value )

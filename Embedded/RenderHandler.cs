@@ -63,6 +63,11 @@
 			return true;
 		}
 
+		protected override void OnScrollOffsetChanged( CefBrowser browser )
+		{
+			Log.Trace( "RenderHandler.OnScrollOffsetChanged( browser: {0} )", browser.Identifier );
+		}
+
 		protected override void OnPopupSize( CefBrowser browser, CefRectangle rect )
 		{
 			Log.Trace( "RenderHandler.OnPopupSize( browser: {0} )", browser.Identifier );

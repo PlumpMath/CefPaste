@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Browser.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="Embedded\DragHandler.cs" />
     <Compile Include="Router.cs" />
     <Compile Include="Runtime.cs" />
     <Compile Include="Embedded\App.cs" />
@@ -93,7 +94,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.YearDayOfYear" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.YearDayOfYear" BuildVersion_UpdateAssemblyVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

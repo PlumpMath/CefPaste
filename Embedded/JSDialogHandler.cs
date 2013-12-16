@@ -86,6 +86,11 @@
 			return true;
 		}
 
+		protected override void OnDialogClosed( CefBrowser browser )
+		{
+			Log.Trace( "JSDialogHandler.OnDialogClosed( browser: {0} )", browser.Identifier );
+		}
+
 		protected override void OnResetDialogState( CefBrowser browser )
 		{
 			Log.Trace( "JSDialogHandler.OnResetDialogState( browser: {0} )", browser.Identifier );

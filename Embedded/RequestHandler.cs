@@ -50,14 +50,6 @@
 			//return base.GetAuthCredentials( browser, frame, isProxy, host, port, realm, scheme, callback );
 		}
 
-		protected override CefCookieManager GetCookieManager( CefBrowser browser, String mainUrl )
-		{
-			Log.Trace( "RequestHandler.GetCookieManager( browser: {0}, mainUrl: {1} )", browser.Identifier, mainUrl );
-			
-			return this.Client.CookieManager;
-			//return base.GetCookieManager( browser, mainUrl );
-		}
-
 		protected override CefResourceHandler GetResourceHandler( CefBrowser browser, CefFrame frame, CefRequest request )
 		{
 			Log.Trace( "RequestHandler.GetResourceHandler( browser: {0}, frame: {1}, request: {2} )",
@@ -84,6 +76,16 @@
 				frame.Identifier,
 				request.Method + " " + request.Url );
 			return base.OnBeforeResourceLoad( browser, frame, request );
+		}
+
+		protected override Boolean OnBeforeBrowse( CefBrowser browser, CefFrame frame, CefRequest request, Boolean isRedirect )
+		{
+			Log.Trace( "RequestHandler.OnBeforeBrowse( browser: {0}, frame: {1}, request: {2}, isRedirect: {3} )",
+				   browser.Identifier,
+				   frame.Identifier,
+				   request.Method + " " + request.Url,
+				   isRedirect );
+			return base.OnBeforeBrowse( browser, frame, request, isRedirect );
 		}
 
 		protected override Boolean OnCertificateError( CefErrorCode certError, String requestUrl, CefAllowCertificateErrorCallback callback )
@@ -117,6 +119,18 @@
 				oldUrl,
 				newUrl );
 			base.OnResourceRedirect( browser, frame, oldUrl, ref newUrl );
+		}
+
+		protected override void OnPluginCrashed( CefBrowser browser, String pluginPath )
+		{
+			Log.Trace( "RequestHandler.OnPluginCrashed( browser: {0}, pluginPath: {1} )", browser.Identifier, pluginPath );
+			base.OnPluginCrashed( browser, pluginPath );
+		}
+
+		protected override void OnRenderProcessTerminated( CefBrowser browser, CefTerminationStatus status )
+		{
+			Log.Trace( "RequestHandler.OnRenderProcessTerminated( browser: {0}, status: {1} )", Enum.GetName( typeof( CefTerminationStatus ), status ) );
+			base.OnRenderProcessTerminated( browser, status );
 		}
 	}
 }

@@ -21,7 +21,7 @@
 		{
 			this.App = app;
 		}
-		
+
 		protected override Boolean OnBeforeNavigation( CefBrowser browser, CefFrame frame, CefRequest request, CefNavigationType navigationType, Boolean isRedirect )
 		{
 			Log.Trace( "RenderProcessHandler.OnBeforeNavigation( browser: {0}, frame: {1}, request: {2}, navigationType: {3}, isRedirect: {4} )",
@@ -152,6 +152,12 @@
 		{
 			Log.Trace( "RenderProcessHandler.OnRenderThreadCreated( extraInfo: CefListValue[{0}] )", extraInfo.Count );
 			base.OnRenderThreadCreated( extraInfo );
+		}
+
+		protected override CefLoadHandler GetLoadHandler()
+		{
+			Log.Trace( "RenderProcessHandler.GetLoadHandler()" );
+			return base.GetLoadHandler(); // @todo- what about CefClient.GetLoadHandler()?
 		}
 
 		protected override void OnUncaughtException( CefBrowser browser, CefFrame frame, CefV8Context context, CefV8Exception exception, CefV8StackTrace stackTrace )

@@ -22,7 +22,7 @@
 		internal CefBrowser Browser;
 
 		internal ManualResetEvent BrowserCreatedWaiter = new ManualResetEvent( false );
-
+		
 		public Client()
 		{
 			this.Handlers = new ClientHandlers( App.Instance, this );
@@ -302,6 +302,7 @@
 				this.DialogHandler = new DialogHandler( app, client );
 				this.DisplayHandler = new DisplayHandler( app, client );
 				this.DownloadHandler = new DownloadHandler( app, client );
+				this.DragHandler = new DragHandler( app, client );
 				this.FocusHandler = new FocusHandler( app, client );
 				this.GeolocationHandler = new GeolocationHandler( app, client );
 				this.JSDialogHandler = new JSDialogHandler( app, client );
@@ -316,6 +317,7 @@
 			public readonly DialogHandler DialogHandler;
 			public readonly DisplayHandler DisplayHandler;
 			public readonly DownloadHandler DownloadHandler;
+			public readonly DragHandler DragHandler;
 			public readonly FocusHandler FocusHandler;
 			public readonly GeolocationHandler GeolocationHandler;
 			public readonly JSDialogHandler JSDialogHandler;
@@ -344,6 +346,11 @@
 		protected override CefDownloadHandler GetDownloadHandler()
 		{
 			return this.Handlers.DownloadHandler;
+		}
+
+		protected override CefDragHandler GetDragHandler()
+		{
+			return this.Handlers.DragHandler;
 		}
 
 		protected override CefFocusHandler GetFocusHandler()

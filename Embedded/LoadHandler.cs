@@ -51,18 +51,21 @@
 			base.OnLoadStart( browser, frame );
 		}
 
-		protected override void OnPluginCrashed( CefBrowser browser, String pluginPath )
+		protected override void OnLoadingStateChange( CefBrowser browser, Boolean isLoading, Boolean canGoBack, Boolean canGoForward )
 		{
-			Log.Trace( "LoadHandler.OnPluginCrashed( browser: {0}, pluginPath: {1} )", browser.Identifier, pluginPath );
-			base.OnPluginCrashed( browser, pluginPath );
-		}
+			Log.Trace( "LoadHandler.OnLoadingStateChange( browser: {0}, isLoading: {1}, canGoBack: {2}, canGoForward: {3} )", browser.Identifier, isLoading, canGoBack, canGoForward );
 
-		protected override void OnRenderProcessTerminated( CefBrowser browser, CefTerminationStatus status )
-		{
-			Log.Trace( "LoadHandler.OnRenderProcessTerminated( browser: {0}, status: {1} )",
-				browser.Identifier,
-				Enum.GetName( typeof( CefTerminationStatus ), status ) );
-			base.OnRenderProcessTerminated( browser, status );
+			if( isLoading && this.Client.HandleLoadStarted != null )
+			{
+				this.Client.HandleLoadStarted();
+			}
+
+			if( isLoading == false && this.Client.HandleLoadFinished != null )
+			{
+				this.Client.HandleLoadFinished();
+			}
+
+			base.OnLoadingStateChange( browser, isLoading, canGoBack, canGoForward );
 		}
 	}
 }
