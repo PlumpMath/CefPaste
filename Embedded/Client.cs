@@ -175,6 +175,11 @@
 			}
 		}
 
+		public void Print()
+		{
+			this.Browser.GetHost().Print();
+		}
+
 		///////////////////////////////////////////////////////////////////////
 
 		internal delegate String[] FileDialogHandler( String title, String defaultFileName, String[] acceptTypes );
