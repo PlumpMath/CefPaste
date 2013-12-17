@@ -38,8 +38,6 @@
 		{
 			this.Handlers = new ClientHandlers( App.Instance, this );
 
-			this.CookieManagerPriv = @this.CookieManagerPriv;
-
 			this.Width = @this.WidthPriv;
 			this.Height = @this.HeightPriv;
 
@@ -73,7 +71,8 @@
 			CefBrowserHost.CreateBrowser(
 				client : this,
 				windowInfo : windowInfo,
-				settings : browserSettings );
+				settings : browserSettings,
+				requestContext: CefRequestContext.CreateContext( new RequestContextHandler() ) );
 		}
 
 		public void Dispose()
@@ -173,32 +172,6 @@
 						EventType = CefKeyEventType.Char,
 						Modifiers = CefEventFlags.None,
 					} );
-			}
-		}
-
-		///////////////////////////////////////////////////////////////////////
-
-		private CefCookieManager CookieManagerPriv;
-
-		public CefCookieManager CookieManager
-		{
-			get
-			{
-				if( this.CookieManagerPriv == null )
-				{
-					this.CookieManagerPriv = CefCookieManager.Create( null, false );
-				}
-
-				return this.CookieManagerPriv;
-			}
-			set
-			{
-				if( this.CookieManagerPriv != null )
-				{
-					throw new InvalidOperationException( "CookieManager has already been set" );
-				}
-
-				this.CookieManagerPriv = value;
 			}
 		}
 
