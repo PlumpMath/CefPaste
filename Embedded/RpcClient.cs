@@ -29,7 +29,7 @@
 			this.Browser = browser;
 		}
 
-		public JSValue Invoke( String procedure, Object[] arguments, Int32 timeoutMsec = 3000 )
+		public JSValue Invoke( String procedure, Object[] arguments, Int32 timeoutMsec = 5000 )
 		{
 			Log.Trace( "RpcClient.Invoke( procedure: {0} )", procedure );
 
@@ -48,12 +48,12 @@
 
 			RpcBroker.Message reply;
 
-			//var spinCount = 0;
+			var spinCount = 0;
 			while( this.Replies.TryGetValue( request.Token, out reply ) == false )
 			{
-				//if( spinCount > ( timeoutMsec / 100 ) ) break;
-				Thread.Sleep( 100 );
-				//spinCount++;
+				if( spinCount > ( timeoutMsec / 10 ) ) break;
+				Thread.Sleep( 10 );
+				spinCount++;
 			}
 
 			if( reply == null ) throw new TimeoutException( "A remote invocation has timed out before receiving a reply" );

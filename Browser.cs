@@ -2,6 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Drawing;
+	using System.Threading;
 	using Embedded;
 	using NLog;
 
@@ -215,6 +217,18 @@
 			this.Client.Type( text );
 		}
 
+		/// <summary></summary>
+		// @todo commeting out until CEF3 has a way to not show the print dialog
+		//public void Print()
+		//{
+		//	this.Client.Print();
+		//}
+
+		public Bitmap Render()
+		{
+			return this.Client.Render();
+		}
+
 		///////////////////////////////////////////////////////////////////////
 
 		/// <summary></summary>
@@ -228,7 +242,10 @@
 
 			var controller = this.Router.Route( location );
 
-			controller.TaskFactory.StartNew( () => controller.OnLoad( this, location ) );
+			controller.TaskFactory.StartNew( () =>
+			{
+				if( this.Client.Browser != null ) controller.OnLoad( this, location );
+			} );
 		}
 
 		private Boolean OnUnauthorized( String host, Int32 port, String realm, String scheme, out String username, out String password )

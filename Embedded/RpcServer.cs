@@ -1,6 +1,7 @@
 ﻿namespace Chromium.Embedded
 {
 	using System;
+	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
 

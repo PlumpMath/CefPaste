@@ -1,8 +1,11 @@
 ﻿namespace Chromium.Embedded
 {
 	using System;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
+	using System.Runtime.Serialization.Formatters.Binary;
+	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
 
@@ -59,44 +62,67 @@
 
 			m_javascriptInvokeServer.RequestHandler = request =>
 			{
+				var function = request[0] as String ?? "";
+				var arguments = request[1] as Object[] ?? new Object[0];
+
+				Log.Debug( "Invoking function {0} with {1} args", function, arguments.Length );
+
 				var ctx = m_javascriptInvokeServer.Browser.GetMainFrame().V8Context;
-				var global = ctx.GetGlobal();
-
-				var funcName = request[0] as String ?? String.Empty;
-				var args = request[1] as Object[] ?? new Object[0];
-
-				Log.Trace( "m_javascriptInvokeServer.RequestHandler( funcName: {0} )", funcName );
 
 				if( ctx.Enter() == false ) throw new InvalidOperationException( "Could not acquire the V8 context" );
 
-				var func = global.GetValue( funcName );
+				JSValue result;
 
-				var rawArgs = (Object[])( new JSValue( args ).Value );
+				try
+				{
+					var global = ctx.GetGlobal();
 
-				var v8Args = rawArgs.Select( arg => new JSValue( arg ).AsV8Value() ).ToArray();
+					var func = global.GetValue( function );
 
-				var v8Return = func.ExecuteFunctionWithContext( ctx, global, v8Args );
+					var rawArgs = (Object[])( new JSValue( arguments ).Value );
 
-				var result = new JSValue( v8Return );
+					var v8Args = rawArgs.Select( arg => new JSValue( arg ).AsV8Value() ).ToArray();
 
-				global.Dispose();
+					var v8Return = func.ExecuteFunctionWithContext( ctx, global, v8Args );
 
-				ctx.Exit();
+					result = new JSValue( v8Return );
 
-				ctx.Dispose();
+					Log.Debug( "Invoked function {0} with {1} args", function, arguments.Length );
+				}
+				finally
+				{
+					ctx.Exit();
+				}
 
 				return result;
 			};
 
 			m_javascriptEvalServer = new RpcServer( browser, "javascript:eval" );
 
-			this.m_javascriptEvalServer.RequestHandler = request =>
+			m_javascriptEvalServer.RequestHandler = request =>
 			{
-				Log.Trace( "m_javascriptEvalServer.RequestHandler( funcName: eval )" );
+				var eval = request[0] as String ?? "";
 
-				m_javascriptEvalServer.Browser
-					.GetMainFrame()
-					.ExecuteJavaScript( request[0] as String ?? String.Empty, "about:blank", 0 );
+				Log.Debug( "Evaling {0} character string", eval.Length );
+
+				var ctx = m_javascriptEvalServer.Browser.GetMainFrame().V8Context;
+
+				if( ctx.Enter() == false ) throw new InvalidOperationException( "Could not acquire the V8 context" );
+
+				try
+				{
+					var global = ctx.GetGlobal();
+
+					var func = global.GetValue( "eval" );
+
+					func.ExecuteFunctionWithContext( ctx, global, new[] { CefV8Value.CreateString( eval ) } );
+
+					Log.Debug( "Eval'd {0} character string", eval.Length );
+				}
+				finally
+				{
+					ctx.Exit();
+				}
 
 				return null;
 			};
@@ -112,7 +138,7 @@
 
 			m_javascriptInvokeServer.Dispose();
 
-			this.m_javascriptEvalServer.Dispose();
+			m_javascriptEvalServer.Dispose();
 
 			base.OnContextReleased( browser, frame, context );
 		}
@@ -132,16 +158,17 @@
 				browser.Identifier,
 				Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 
-			if( sourceProcess == CefProcessId.Browser )
+			if( sourceProcess == CefProcessId.Browser ) // in Render process
 			{
 				RpcBroker.DispatchRequest( message.Arguments );
 			}
-			else if( sourceProcess == CefProcessId.Renderer )
-			{
-				RpcBroker.DispatchReply( message.Arguments );
-			}
+			//else if( sourceProcess == CefProcessId.Renderer ) // in Browser process
+			//{
+			//	RpcBroker.DispatchReply( message.Arguments );
+			//}
 			else
 			{
+				Log.Debug( "Message received from CefProcessId.{0}", Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 				return false;
 			}
 
@@ -162,7 +189,7 @@
 
 		protected override void OnUncaughtException( CefBrowser browser, CefFrame frame, CefV8Context context, CefV8Exception exception, CefV8StackTrace stackTrace )
 		{
-			Log.Trace( "RenderProcessHandler.OnUncaughtException( browser: {0}, frame: {1}, exception: {2} )",
+			Log.Warn( "RenderProcessHandler.OnUncaughtException( browser: {0}, frame: {1}, exception: {2} )",
 				browser.Identifier,
 				frame.Identifier,
 				"\"" + exception.Message + "\" at line " + exception.LineNumber + " in script \"" + exception.ScriptResourceName + "\"" );

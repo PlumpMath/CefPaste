@@ -26,6 +26,12 @@
 			this.Client = client;
 		}
 
+		protected override void OnLoadStart( CefBrowser browser, CefFrame frame )
+		{
+			Log.Trace( "LoadHandler.OnLoadStart( browser: {0}, frame: {1} )", browser.Identifier, frame.Identifier );
+			base.OnLoadStart( browser, frame );
+		}
+
 		protected override void OnLoadEnd( CefBrowser browser, CefFrame frame, Int32 httpStatusCode )
 		{
 			Log.Trace( "LoadHandler.OnLoadEnd( browser: {0}, frame: {1}, httpStatusCode: {2} )",
@@ -45,24 +51,18 @@
 			base.OnLoadError( browser, frame, errorCode, errorText, failedUrl );
 		}
 
-		protected override void OnLoadStart( CefBrowser browser, CefFrame frame )
-		{
-			Log.Trace( "LoadHandler.OnLoadStart( browser: {0}, frame: {1} )", browser.Identifier, frame.Identifier );
-			base.OnLoadStart( browser, frame );
-		}
-
 		protected override void OnLoadingStateChange( CefBrowser browser, Boolean isLoading, Boolean canGoBack, Boolean canGoForward )
 		{
 			Log.Trace( "LoadHandler.OnLoadingStateChange( browser: {0}, isLoading: {1}, canGoBack: {2}, canGoForward: {3} )", browser.Identifier, isLoading, canGoBack, canGoForward );
 
 			if( isLoading && this.Client.HandleLoadStarted != null )
 			{
-				this.Client.HandleLoadStarted();
+				if( this.Client.Browser != null ) this.Client.HandleLoadStarted();
 			}
 
 			if( isLoading == false && this.Client.HandleLoadFinished != null )
 			{
-				this.Client.HandleLoadFinished();
+				if( this.Client.Browser != null ) this.Client.HandleLoadFinished();
 			}
 
 			base.OnLoadingStateChange( browser, isLoading, canGoBack, canGoForward );

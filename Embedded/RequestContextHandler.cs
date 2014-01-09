@@ -22,6 +22,8 @@
 		protected override CefCookieManager GetCookieManager()
 		{
 			Log.Trace( "RequestContextHandler.GetCookieManager()" );
+
+			return CefCookieManager.Global;
 			return null; // "the default cookie manager will be returned if this method returns null"
 		}
 	}

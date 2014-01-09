@@ -1,6 +1,10 @@
 ﻿namespace Chromium.Embedded
 {
 	using System;
+	using System.Drawing;
+	using System.Drawing.Imaging;
+	using System.Runtime.InteropServices;
+	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
 
@@ -79,9 +83,22 @@
 			base.OnPopupShow( browser, show );
 		}
 
+		private Bitmap NextBitmap = null;
+
+		public Bitmap Bitmap
+		{
+			get
+			{
+				while( this.NextBitmap == null ) Thread.Sleep( 10 );
+				return this.NextBitmap;
+			}
+		}
+
 		protected override void OnPaint( CefBrowser browser, CefPaintElementType type, CefRectangle[] dirtyRects, IntPtr buffer, Int32 width, Int32 height )
 		{
 			Log.Trace( "RenderHandler.OnPaint( browser: {0}, type: {1} )", browser.Identifier, Enum.GetName( typeof( CefPaintElementType ), type ) );
+
+			this.NextBitmap = new Bitmap( width, height, width * 4, PixelFormat.Format32bppPArgb, buffer );
 		}
 
 		protected override void OnCursorChange( CefBrowser browser, IntPtr cursorHandle )

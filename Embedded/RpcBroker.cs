@@ -2,6 +2,9 @@
 {
 	using System;
 	using System.Collections.Concurrent;
+	using System.IO;
+	using System.Runtime.Serialization.Formatters.Binary;
+	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
 
@@ -35,13 +38,29 @@
 			public JSValue Data;
 		}
 
+		public class InvokeTask: CefTask
+		{
+			public readonly Action Act;
+
+			public InvokeTask( Action action )
+			{
+				if( action == null ) throw new ArgumentNullException( "action" );
+				this.Act = action;
+			}
+
+			protected override void Execute()
+			{
+				this.Act();
+			}
+		}
+
 		// <Method, Server>
-		private static readonly ConcurrentDictionary<string, RpcServer> s_serverMethods =
-			new ConcurrentDictionary<string, RpcServer>();
+		private static readonly ConcurrentDictionary<String, RpcServer> s_serverMethods =
+			new ConcurrentDictionary<String, RpcServer>();
 
 		// <Token, Client>
-		private static readonly ConcurrentDictionary<string, RpcClient> s_clientTokens =
-			new ConcurrentDictionary<string, RpcClient>();
+		private static readonly ConcurrentDictionary<String, RpcClient> s_clientTokens =
+			new ConcurrentDictionary<String, RpcClient>();
 
 		public static void Register( this RpcServer server, String procedure )
 		{
@@ -119,7 +138,8 @@
 			processMessage.Arguments.SetString( 0, reply.Token );
 			processMessage.Arguments.SetString( 1, reply.Procedure );
 			if( reply.Data != null ) processMessage.Arguments.SetList( 2, reply.Data.AsCefListValue() );
-			
+			else processMessage.Arguments.SetList( 2, CefListValue.Create() );
+
 			server.Browser.SendProcessMessage( CefProcessId.Browser, processMessage );
 		}
 		 

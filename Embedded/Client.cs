@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.ComponentModel;
+	using System.Drawing;
 	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
@@ -79,9 +80,11 @@
 		{
 			this.BrowserCreatedWaiter.Dispose();
 
-			this.Browser.GetHost().CloseBrowser();
+			if( this.Browser != null ) this.Browser.GetHost().CloseBrowser();
 
-			this.Browser.Dispose();
+			if( this.Browser != null ) this.Browser.Dispose();
+
+			this.Browser = null;
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -175,9 +178,15 @@
 			}
 		}
 
-		public void Print()
+		// @todo commeting out until CEF3 has a way to not show the print dialog
+		//public void Print()
+		//{
+		//	this.Browser.GetHost().Print();
+		//}
+
+		public Bitmap Render()
 		{
-			this.Browser.GetHost().Print();
+			return this.Handlers.RenderHandler.Bitmap;
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -252,16 +261,17 @@
 				browser.Identifier,
 				Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 
-			if( sourceProcess == CefProcessId.Browser )
-			{
-				RpcBroker.DispatchRequest( message.Arguments );
-			}
-			else if( sourceProcess == CefProcessId.Renderer )
+			//if( sourceProcess == CefProcessId.Browser ) // in Render process
+			//{
+			//	RpcBroker.DispatchRequest( message.Arguments );
+			//}
+			if( sourceProcess == CefProcessId.Renderer ) // in Browser process
 			{
 				RpcBroker.DispatchReply( message.Arguments );
 			}
 			else
 			{
+				Log.Debug( "Message received from CefProcessId.{0}", Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 				return false;
 			}
 
