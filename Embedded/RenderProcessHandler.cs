@@ -54,6 +54,12 @@
 
 		protected override void OnContextCreated( CefBrowser browser, CefFrame frame, CefV8Context context )
 		{
+			if( frame.IsMain == false )
+			{
+				base.OnContextCreated( browser, frame, context );
+				return;
+			}
+
 			Log.Trace( "RenderProcessHandler.OnContextCreated( browser: {0}, frame: {1} )",
 				browser.Identifier,
 				frame.Identifier );
@@ -64,8 +70,6 @@
 			{
 				var function = request[0] as String ?? "";
 				var arguments = request[1] as Object[] ?? new Object[0];
-
-				Log.Debug( "Invoking function {0} with {1} args", function, arguments.Length );
 
 				var ctx = m_javascriptInvokeServer.Browser.GetMainFrame().V8Context;
 
@@ -86,8 +90,6 @@
 					var v8Return = func.ExecuteFunctionWithContext( ctx, global, v8Args );
 
 					result = new JSValue( v8Return );
-
-					Log.Debug( "Invoked function {0} with {1} args", function, arguments.Length );
 				}
 				finally
 				{
@@ -103,8 +105,6 @@
 			{
 				var eval = request[0] as String ?? "";
 
-				Log.Debug( "Evaling {0} character string", eval.Length );
-
 				var ctx = m_javascriptEvalServer.Browser.GetMainFrame().V8Context;
 
 				if( ctx.Enter() == false ) throw new InvalidOperationException( "Could not acquire the V8 context" );
@@ -116,8 +116,6 @@
 					var func = global.GetValue( "eval" );
 
 					func.ExecuteFunctionWithContext( ctx, global, new[] { CefV8Value.CreateString( eval ) } );
-
-					Log.Debug( "Eval'd {0} character string", eval.Length );
 				}
 				finally
 				{
@@ -132,6 +130,12 @@
 
 		protected override void OnContextReleased( CefBrowser browser, CefFrame frame, CefV8Context context )
 		{
+			if( frame.IsMain == false )
+			{
+				base.OnContextReleased( browser, frame, context );
+				return;
+			}
+
 			Log.Trace( "RenderProcessHandler.OnContextReleased( browser: {0}, frame: {1} )",
 				browser.Identifier,
 				frame.Identifier );

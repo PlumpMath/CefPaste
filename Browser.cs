@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
+	using System.IO;
 	using System.Threading;
 	using Embedded;
 	using NLog;
@@ -19,16 +20,20 @@
 
 		private readonly Router Router;
 
+		private readonly DirectoryInfo CookieDirectory;
+
 		private readonly Client Client;
 
 		private readonly RpcClient RpcClient;
 
 		/// <summary></summary>
-		public Browser( Router router )
+		public Browser( Router router, DirectoryInfo cookieDirectory = null )
 		{
 			this.Router = router;
 
-			this.Client = new Client();
+			this.CookieDirectory = cookieDirectory ?? new DirectoryInfo( Path.Combine( Path.GetTempPath(), Guid.NewGuid().ToString( "N" ) ) );
+
+			this.Client = new Client( this.CookieDirectory );
 
 			this.RpcClient = new RpcClient( this.Client.Browser );
 
@@ -62,6 +67,8 @@
 			this.Client.HandleDownloadProgress = this.OnDownloadProgress;
 
 			this.Client.HandleOpenFileDialog = this.OnFileOpenDialog;
+
+			this.Client.HandleConsoleMessage = ( message, source, line ) => Log.Debug( message );
 		}
 
 		public void Dispose()
@@ -191,6 +198,8 @@
 
 			var code = @"(function( selector ){
 	var node = document.querySelector( selector );
+//if( node == null ) console.log( 'Click() node = ' + node );
+//if( node == null ) console.log( 'Click() selector = ' + selector );
 	if( node == null ) return;
 	node.scrollIntoView();
 	var clientRect = node.getBoundingClientRect();

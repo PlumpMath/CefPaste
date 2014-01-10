@@ -3,6 +3,7 @@
 	using System;
 	using System.ComponentModel;
 	using System.Drawing;
+	using System.IO;
 	using System.Threading;
 	using NLog;
 	using Xilium.CefGlue;
@@ -20,14 +21,18 @@
 		
 		private readonly ClientHandlers Handlers;
 
+		private readonly DirectoryInfo CookieDirectory;
+
 		internal CefBrowser Browser;
 
 		internal ManualResetEvent BrowserCreatedWaiter = new ManualResetEvent( false );
-		
-		public Client()
+
+		public Client( DirectoryInfo cookieDirectory )
 		{
 			this.Handlers = new ClientHandlers( App.Instance, this );
 
+			this.CookieDirectory = cookieDirectory;
+			
 			this.CreateBrowser();
 
 			// this.Browser will be set by LifeSpanHandler.OnAfterCreated(), which will then also signal BrowserCreatedWaiter
@@ -38,6 +43,8 @@
 		public Client( Client @this )
 		{
 			this.Handlers = new ClientHandlers( App.Instance, this );
+
+			this.CookieDirectory = @this.CookieDirectory;
 
 			this.Width = @this.WidthPriv;
 			this.Height = @this.HeightPriv;
@@ -68,12 +75,12 @@
 				JavaScriptCloseWindows = CefState.Disabled,
 				WebGL = CefState.Disabled,
 			};
-
+			
 			CefBrowserHost.CreateBrowser(
 				client : this,
 				windowInfo : windowInfo,
 				settings : browserSettings,
-				requestContext: CefRequestContext.CreateContext( new RequestContextHandler() ) );
+				requestContext: CefRequestContext.CreateContext( new RequestContextHandler( this.CookieDirectory ) ) );
 		}
 
 		public void Dispose()
@@ -86,7 +93,7 @@
 
 			this.Browser = null;
 		}
-
+		
 		///////////////////////////////////////////////////////////////////////
 		
 		[EditorBrowsable( EditorBrowsableState.Never )]
@@ -186,7 +193,7 @@
 
 		public Bitmap Render()
 		{
-			return this.Handlers.RenderHandler.Bitmap;
+			return this.Handlers.RenderHandler.Render();
 		}
 
 		///////////////////////////////////////////////////////////////////////
@@ -210,6 +217,8 @@
 		internal LoadingStateChangeHandler HandleLoadStarted;
 
 		internal LoadingStateChangeHandler HandleLoadFinished;
+
+		internal LoadingStateChangeHandler HandleLoadError;
 
 		internal delegate void StatusMessageChangeHandler( String message );
 

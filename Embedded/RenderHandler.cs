@@ -83,14 +83,17 @@
 			base.OnPopupShow( browser, show );
 		}
 
-		private Bitmap NextBitmap = null;
+		//private DateTime LastPainted = DateTime.MinValue;
 
-		public Bitmap Bitmap
+		private Bitmap NextBitmap = new Bitmap( 1, 1, PixelFormat.Format32bppPArgb );
+
+		public Bitmap Render()
 		{
-			get
+			//while( this.LastPainted.Add( new TimeSpan( 0, 0, 0, 0, 5 ) ).CompareTo( DateTime.Now ) >= 0 ) Thread.Sleep( 1 );
+
+			lock( this.NextBitmap )
 			{
-				while( this.NextBitmap == null ) Thread.Sleep( 10 );
-				return this.NextBitmap;
+				return new Bitmap( this.NextBitmap );
 			}
 		}
 
@@ -98,7 +101,12 @@
 		{
 			Log.Trace( "RenderHandler.OnPaint( browser: {0}, type: {1} )", browser.Identifier, Enum.GetName( typeof( CefPaintElementType ), type ) );
 
-			this.NextBitmap = new Bitmap( width, height, width * 4, PixelFormat.Format32bppPArgb, buffer );
+			//this.LastPainted = DateTime.Now;
+
+			lock( this.NextBitmap )
+			{
+				this.NextBitmap = new Bitmap( width, height, width * 4, PixelFormat.Format32bppPArgb, buffer );
+			}
 		}
 
 		protected override void OnCursorChange( CefBrowser browser, IntPtr cursorHandle )

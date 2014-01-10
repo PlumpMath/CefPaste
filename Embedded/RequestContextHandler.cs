@@ -15,16 +15,21 @@
 			Log = LogManager.GetCurrentClassLogger();
 		}
 
-		public RequestContextHandler()
+		private readonly CefCookieManager CookieManager;
+
+		public RequestContextHandler( DirectoryInfo cookieDirectory )
 		{
+			if( cookieDirectory != null )
+			{
+				this.CookieManager = CefCookieManager.Create( cookieDirectory.FullName, false );
+			}
 		}
 
 		protected override CefCookieManager GetCookieManager()
 		{
 			Log.Trace( "RequestContextHandler.GetCookieManager()" );
-
-			return CefCookieManager.Global;
-			return null; // "the default cookie manager will be returned if this method returns null"
+			
+			return this.CookieManager ?? CefCookieManager.Global;
 		}
 	}
 }
