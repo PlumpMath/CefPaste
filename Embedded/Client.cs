@@ -27,7 +27,7 @@
 
 		internal ManualResetEvent BrowserCreatedWaiter = new ManualResetEvent( false );
 
-		public Client( DirectoryInfo cookieDirectory )
+		public Client( DirectoryInfo cookieDirectory = null )
 		{
 			this.Handlers = new ClientHandlers( App.Instance, this );
 
@@ -280,7 +280,6 @@
 			}
 			else
 			{
-				Log.Debug( "Message received from CefProcessId.{0}", Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 				return false;
 			}
 

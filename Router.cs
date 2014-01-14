@@ -6,7 +6,6 @@
 	using System.Timers;
 	using NLog;
 
-	/// <summary></summary>
 	public sealed class Router: IDisposable
 	{
 		private static readonly Logger Log;
@@ -20,14 +19,12 @@
 
 		public Action<Router> OnTimeout;
 
-		/// <summary></summary>
 		public Int32 TimeoutSeconds
 		{
 			get { return (Int32)this.TimeoutWaiter.Interval; }
 			set { this.TimeoutWaiter.Interval = value * 1000; }
 		}
 
-		/// <summary></summary>
 		public Router( Int32 timeoutSeconds = 10 )
 		{
 			this.TimeoutWaiter = new Timer
@@ -58,7 +55,6 @@
 
 		private readonly List<Tuple<Regex, Controller>> Routes = new List<Tuple<Regex, Controller>>();
 
-		/// <summary></summary>
 		public void IgnoreRoute( Regex regex )
 		{
 			if( regex == null ) throw new ArgumentNullException( "regex" );
@@ -66,7 +62,6 @@
 			this.Routes.Add( new Tuple<Regex, Controller>( regex, null ) );
 		}
 
-		/// <summary></summary>
 		public void IgnoreRoute( String regex )
 		{
 			if( String.IsNullOrWhiteSpace( regex ) ) throw new ArgumentException( "regex" );
@@ -74,7 +69,6 @@
 			this.IgnoreRoute( new Regex( regex, RegexOptions.Compiled | RegexOptions.CultureInvariant ) );
 		}
 
-		/// <summary></summary>
 		public void MapRoute( Regex regex, Controller controller )
 		{
 			if( regex == null ) throw new ArgumentNullException( "regex" );
@@ -83,7 +77,6 @@
 			this.Routes.Add( new Tuple<Regex, Controller>( regex, controller ) );
 		}
 
-		/// <summary></summary>
 		public void MapRoute( String regex, Controller controller )
 		{
 			if( String.IsNullOrWhiteSpace( regex ) ) throw new ArgumentException( "regex" );

@@ -17,11 +17,15 @@
 
 		private readonly CefCookieManager CookieManager;
 
-		public RequestContextHandler( DirectoryInfo cookieDirectory )
+		public RequestContextHandler( DirectoryInfo cookieDirectory = null )
 		{
 			if( cookieDirectory != null )
 			{
 				this.CookieManager = CefCookieManager.Create( cookieDirectory.FullName, false );
+			}
+			else
+			{
+				this.CookieManager = CefCookieManager.Create( null, false );
 			}
 		}
 

@@ -172,7 +172,6 @@
 			//}
 			else
 			{
-				Log.Debug( "Message received from CefProcessId.{0}", Enum.GetName( typeof( CefProcessId ), sourceProcess ) );
 				return false;
 			}
 
@@ -188,7 +187,7 @@
 		protected override CefLoadHandler GetLoadHandler()
 		{
 			Log.Trace( "RenderProcessHandler.GetLoadHandler()" );
-			return base.GetLoadHandler(); // @todo- what about CefClient.GetLoadHandler()?
+			return base.GetLoadHandler();
 		}
 
 		protected override void OnUncaughtException( CefBrowser browser, CefFrame frame, CefV8Context context, CefV8Exception exception, CefV8StackTrace stackTrace )

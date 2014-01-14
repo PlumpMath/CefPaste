@@ -4,11 +4,9 @@
 	using System.Collections.Generic;
 	using System.Drawing;
 	using System.IO;
-	using System.Threading;
 	using Embedded;
 	using NLog;
 
-	/// <summary></summary>
 	public sealed class Browser: IDisposable
 	{
 		private static readonly Logger Log;
@@ -26,12 +24,11 @@
 
 		private readonly RpcClient RpcClient;
 
-		/// <summary></summary>
 		public Browser( Router router, DirectoryInfo cookieDirectory = null )
 		{
 			this.Router = router;
 
-			this.CookieDirectory = cookieDirectory ?? new DirectoryInfo( Path.Combine( Path.GetTempPath(), Guid.NewGuid().ToString( "N" ) ) );
+			this.CookieDirectory = cookieDirectory;
 
 			this.Client = new Client( this.CookieDirectory );
 
@@ -42,7 +39,6 @@
 			Runtime.Register( this );
 		}
 
-		/// <summary></summary>
 		public Browser( Browser @this )
 		{
 			this.Router = @this.Router;
@@ -80,14 +76,12 @@
 
 		///////////////////////////////////////////////////////////////////////
 
-		/// <summary></summary>
 		public UInt16 Width
 		{
 			get { return this.Client.Width; }
 			set { this.Client.Width = value; }
 		}
 
-		/// <summary></summary>
 		public UInt16 Height
 		{
 			get { return this.Client.Height; }
@@ -96,19 +90,16 @@
 
 		///////////////////////////////////////////////////////////////////////
 		
-		/// <summary></summary>
 		public void Load( String url )
 		{
 			this.Client.Browser.GetMainFrame().LoadUrl( url );
 		}
 
-		/// <summary></summary>
 		public void Reload()
 		{
 			this.Client.Browser.ReloadIgnoreCache();
 		}
 
-		/// <summary></summary>
 		public void Stop()
 		{
 			this.Client.Browser.StopLoad();
@@ -116,7 +107,6 @@
 
 		///////////////////////////////////////////////////////////////////////
 		
-		/// <summary></summary>
 		public Boolean Back()
 		{
 			var result = this.Client.Browser.CanGoBack;
@@ -124,7 +114,6 @@
 			return result;
 		}
 
-		/// <summary></summary>
 		public Boolean Forward()
 		{
 			var result = this.Client.Browser.CanGoForward;
@@ -134,7 +123,6 @@
 
 		///////////////////////////////////////////////////////////////////////
 
-		/// <summary></summary>
 		public void EvalJS( String script )
 		{
 			if( String.IsNullOrWhiteSpace( script ) )
@@ -149,7 +137,6 @@
 			this.RpcClient.Invoke( "javascript:eval", evalArgs.ToArray() );
 		}
 
-		/// <summary></summary>
 		public String CompileJS( String script )
 		{
 			if( String.IsNullOrWhiteSpace( script ) )
@@ -169,7 +156,6 @@
 			return funcName;
 		}
 
-		/// <summary></summary>
 		public Object[] InvokeJS( String function, params Object[] args )
 		{
 			if( String.IsNullOrWhiteSpace( function ) )
@@ -190,7 +176,6 @@
 
 		///////////////////////////////////////////////////////////////////////
 
-		/// <summary></summary>
 		/// <see cref="http://www.w3.org/TR/selectors-api/" />
 		public void Click( String selector )
 		{
@@ -198,8 +183,6 @@
 
 			var code = @"(function( selector ){
 	var node = document.querySelector( selector );
-//if( node == null ) console.log( 'Click() node = ' + node );
-//if( node == null ) console.log( 'Click() selector = ' + selector );
 	if( node == null ) return;
 	node.scrollIntoView();
 	var clientRect = node.getBoundingClientRect();
@@ -220,13 +203,11 @@
 			this.Client.Click( (Int32)coordinates[0], (Int32)coordinates[1] );
 		}
 
-		/// <summary></summary>
 		public void Type( String text )
 		{
 			this.Client.Type( text );
 		}
 
-		/// <summary></summary>
 		// @todo commeting out until CEF3 has a way to not show the print dialog
 		//public void Print()
 		//{
@@ -240,7 +221,6 @@
 
 		///////////////////////////////////////////////////////////////////////
 
-		/// <summary></summary>
 		public Action BeforeLoad;
 
 		private void OnLoadFinished()
